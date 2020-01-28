@@ -20,7 +20,7 @@
 <script>
 // import Media from '@dongido/vue-viaudio'
 import {vueVimeoPlayer} from 'vue-vimeo-player'
-import Base from './Base.vue'
+import Base from '~/components/Base.vue'
 import DynamicImage from './DynamicImage.vue'
 
 // import VueVideo from './file.vue'

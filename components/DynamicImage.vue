@@ -1,22 +1,25 @@
 <template lang="pug">
-span.image-wrapper( v-bind:class="classes" :style="{paddingTop: paddingTop}" )
+span.image-wrapper( v-bind:class="classes" :style="{paddingTop: paddingTop}"  itemscope itemtype="http://schema.org/ImageObject" )
 	svg.background( viewBox="0 0 10 10" preserveAspectRatio="none")
 		path(d='M 0 0 L 10 10 ' vector-effect="non-scaling-stroke" )
 		path(d='M 10 0 L 0 10 ' vector-effect="non-scaling-stroke" )
 
 	span.inner( v-if="$slots.default" ): slot
-	span.image.low( v-if=" file && status >= 0" )
-		img( ref="low" :title="title" :alt="title"  @load="onLoadLow()" :src="lowUrl" v-bind:style="{filter: blur}" )
-	span.image.high( v-if="file && status > 0" )
-		img( ref="high" :title="title" :alt="title" @load="onLoadHigh()" :src="highUrl" )
+	span.image.low( v-show=" file && status >= 0" )
+		img( ref="low" :title="parsedTitle" :alt="title"  @load="onLoadLow()" :src="lowUrl" v-bind:style="{filter: blur}" importance="high" )
+	span.image.high( v-show="file && status > 0" )
+		img( itemprop="contentUrl" ref="high" :title="parsedTitle" :alt="parsedTitle" @load="onLoadHigh()" :src="highUrl" importance="low" )
+	span.invisible(itemprop="name") {{parsedTitle}}
+	span.invisible(itemprop="description") {{parsedDescription}}
+	meta(itemprop="datePublished" :content="$moment( file.uploaded_on ).format('YYYY-MM-DD')")
 </template>
 
 <script>
 	
 export default {
 	name: 'DynamicImage',
-  watch: {
-  },
+	watch: {
+	},
 	computed: {
 		classes() {
 			let classes = {};
@@ -45,15 +48,17 @@ export default {
 		blur() {
 			return `blur( ${this.opts.blur}px )`;
 		},
-		title() {
-			if (!this.opts.title) return this.file.title;
-			return this.opts.title;
+		parsedDescription() {
+			return this.file.description || this.$props.description;
+		},
+		parsedTitle() {
+			return `${this.file.title} ${this.$props.title}`;
 		},
 		lowUrl() {
-			return `${this.$store.state.site.thumbnails}/${this.opts.low.size}/${this.opts.low.size}/contain/${this.opts.low.quality}/${this.file.filename}`;
+			return `${this.$store.state.site.thumbnails}/${this.$props.lowSize}/${this.$props.lowSize}/contain/${this.$props.lowQuality}/${this.file.filename}`;
 		},
 		highUrl() {
-			return `${this.$store.state.site.thumbnails}/${this.opts.high.size}/${this.opts.high.size}/contain/${this.opts.high.quality}/${this.file.filename}`;
+			return `${this.$store.state.site.thumbnails}/${this.$props.highSize}/${this.$props.highSize}/contain/${this.$props.highQuality}/${this.file.filename}`;
 		}
 	},
 	data() {
@@ -110,11 +115,42 @@ export default {
 	props: {
 
 		file: {
+			type: Object,
 			required: true
 		},
 		options: {
 			type: Object,
 			required: false
+		},
+		title: {
+			type: String,
+			required: false,
+			default: ""
+		},
+		description: {
+			type: String,
+			required: false,
+			default: ""
+		},
+		lowSize: {
+			type: Number,
+			required: false,
+			default: 40
+		},
+		highSize: {
+			type: Number,
+			required: false,
+			default: 1200
+		},
+		lowQuality: {
+			type: String,
+			required: false,
+			default: 'poor'
+		},
+		highQuality: {
+			type: String,
+			required: false,
+			default: 'good'
 		}
 	}
 };
@@ -126,6 +162,7 @@ export default {
 .image-wrapper
 	display: block
 	position: relative
+	height: 0px
 	// *
 	// 	padding: 0
 	// 	margin: 0

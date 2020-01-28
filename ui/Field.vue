@@ -5,41 +5,58 @@
 
 <template lang="pug">
 	.field(
-		v-if="data"
-		:class="{disabled: disabled}"
+		:class="fieldClasses"
 	)
 		.field-inner
-			text-input(
-				:field="data"
-				:disabled="disabled"
-				v-if="coreFieldType === 'text'"
-			)
-			text-input(
-				:field="data"
-				:disabled="disabled"
-				v-if="coreFieldType === 'input'"
-			)
-			text-area(
-				:field="data"
-				:disabled="disabled"
-				v-if="coreFieldType === 'textarea'"
-			)
-			checkbox-input(
-				:field="data"
-				:disabled="disabled"
-				v-if="coreFieldType === 'checkbox'"
-			)
-			file-input(
-				:field="data"
-				:disabled="disabled"
-				v-if="coreFieldType === 'file'"
-			)
-			select-input(
-				:field="data"
-				:disabled="disabled"
-				v-if="coreFieldType === 'select'"
-			)
-		//- .errors(v-if=" errors.has(data.name) ") {{errors.first(data.name)}}
+			.text-wrapper( 
+				v-if="inputType"
+				)
+				input(
+					v-validate="rules"
+					data-vv-delay="500"
+					v-model="internalValue"
+					:id="id"
+					@change="onValueChange"
+					:name="id"
+					:disabled="disabled"
+					:placeholder="placeholder"
+					:type="inputType" 
+				)
+			.text-wrapper( 
+				v-if=" type == 'textarea' "
+				)
+				textarea(
+					v-validate="rules"
+					data-vv-delay="500"
+					v-model="internalValue"
+					:id="id"
+					@change="onValueChange"
+					:rows="rows"
+					:name="id"
+					:disabled="disabled"
+					:placeholder="placeholder"
+					:type="inputType" 
+				)
+			.select-wrapper( 
+				v-if=" type == 'select' "
+				)
+				svg(xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 15 15' )
+					path.arrow(d='M 0 5 L 5 10 L 10 5' )
+				select(
+					v-validate="rules"
+					v-model="internalValue"
+					:id="id"
+					@change="onValueChange"
+					:placeholder="placeholder"
+					:disabled="disabled"
+				).select-input
+					option(
+						v-for="o, i in options()"
+						:key="i"
+						:id="i"
+						:value="i"
+					) {{o.name}}
+				.text-wrapper: span( v-if="options()[internalValue]") {{ options()[internalValue].name }}
 
 
 </template>
@@ -47,81 +64,120 @@
 
 <script>
 
-import TextInput from './fields/TextInput.vue'
-import SelectInput from './fields/Select.vue'
-import FileInput from './fields/File.vue'
-import CheckboxInput from './fields/Checkbox.vue'
-import TextArea from './fields/TextArea.vue'
-import LabelInput from './fields/Label.vue'
-
-
 
 export default {
 	inject: ['$validator'],
 	created() {
 	},
+	watch: {
+		value(v) {
+			this.internalValue = v;
+		}
+	},
     computed: {
-    	coreFieldType() {
-
-    		// Add country options to countries field
-
-    		if (this.$props.data.type === 'countries') {
-    			this.$props.data.options = countries;
+    	inputType() {
+    		switch (this.$props.type) {
+			  case 'text':
+			  	return 'text';
+			    break;
+			  case 'input':
+			  	return 'text';
+			    break;
+			  case 'password':
+			  	return 'password';
+			    break;
+			  case 'email':
+			  	return 'email';
+			    break;
+			  default:
+			  	return false;
+			    break;
+			}
+    	},
+    	fieldClasses() {
+    		return {
+    			disabled: this.$props.disabled,
+    			[this.$props.type] : true
     		}
-
-    		// Return the correct component for different data types
-
-    		switch (this.$props.data.type) {
-
-    			// Files
-
-				case 'file': return 'file';
-				case 'image': return 'file';
-				case 'document': return 'file';
-
-				// Textarea
-
-				case 'textarea': return 'textarea';
-				case 'text_area': return 'textarea';
-
-				// Select box
-
-				case 'countries': return 'select';
-				case 'select': return 'select';
-				case 'selectbox': return 'select';
-
-				// Checkbox
-
-				case 'checkbox': return 'checkbox';
-
-				// Default input
-
-				case 'text': return 'input';
-				case 'default': return 'input';
-				case '': return 'input';
-				case 'email': return 'input';
-				case 'telephone': return 'input';
-				case 'phone': return 'input';
-
-				default: return 'input';
-    		}
+    	},
+		arrowPath() {
+			return `M ${this.height * 0.3} ${this.height * 0.4} L ${this.height * 0.5} ${this.height * 0.6} L ${this.height * 0.7} ${this.height * 0.4}`;
+		}
+    },
+    data() {
+    	return {
+    		internalValue: null
     	}
+    },
+    mounted() {
+    	this.internalValue = this.$props.value;
     },
 	name: 'field',
 	components: {
-		TextInput,
-		SelectInput,
-		FileInput,
-		CheckboxInput,
-		TextArea,
-		LabelInput
 	},
-	props: ['data', 'disabled']
+	methods: {
+		onValueChange(o) {
+			console.log('value changed', this.$props.id);
+			this.$emit('update:value', this.internalValue );
+			this.$emit('onChange', this.internalValue );
+		}
+	},
+	props: {
+		value: {
+			required: true
+		},
+		id: {
+			type: String,
+			required: true
+		},
+		type: {
+			type: String,
+			required: true
+		},
+		disabled: {
+			type: Boolean,
+			required: false,
+			default: false
+		},
+		rules: {
+			type: String,
+			required: false
+		},
+		placeholder: {
+			type: String,
+			required: false
+		},
+		options: {
+			type: Function,
+			required: false,
+			default: (obj) => {
+				return ['Option A', 'Option B', 'Option C']
+			}
+		},
+		rows: {
+			type: Number,
+			required: false,
+			default: 12
+		}
+	}
 }
 </script>
 <style lang="sass">
 
-.errors
-	display: block
-	margin-top: 10px
+@import '~/core/_utils'
+
+.select-wrapper
+	position: relative
+	svg
+		width: 1em
+		position: absolute
+		top: 0.5em
+		right: 1em
+		path
+			stroke: black
+			stroke-width: 1px
+			fill: none
+	select
+		opacity: 0
+		@include fill()
 </style>

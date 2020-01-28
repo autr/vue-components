@@ -16,7 +16,7 @@
 
 <script>
 
-import Base from './Base.vue'
+import Base from '~/components/Base.vue'
 export default {
 
   name: 'Map',

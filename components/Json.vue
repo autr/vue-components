@@ -5,7 +5,7 @@
 
 </template>
 <script>
-import Base from './Base.vue'
+import Base from '~/components/Base.vue'
 import Recursive from './_Recursive.vue'
 export default {
   	name: 'Json',

@@ -7,7 +7,7 @@
 
 <script>
 
-import Base from './Base.vue'
+import Base from '~/components/Base.vue'
 // import VideoPlayer from './VideoPlayer.vue'
 import DynamicImage from './DynamicImage.vue'
 

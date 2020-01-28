@@ -13,8 +13,7 @@
 <script>
 
 import axios from "axios"
-import Base from './Base.vue'
-import TextInput from './../ui/fields/TextInput.vue'
+import Base from '~/components/Base.vue'
 import TextArea from './../ui/fields/TextArea.vue'
 import FormAuto from './../ui/Form.vue'
 import Field from './../ui/Field.vue'
@@ -23,7 +22,6 @@ export default {
 	name: 'Subscribe',
 	extends: Base,
 	components: {
-		TextInput,
 		TextArea,
 		FormAuto,
 		Field
