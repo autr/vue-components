@@ -12,7 +12,7 @@
 				v-if="inputType"
 				)
 				input(
-					v-validate="rules"
+
 					data-vv-delay="500"
 					v-model="internalValue"
 					:id="id"
@@ -26,7 +26,7 @@
 				v-if=" type == 'textarea' "
 				)
 				textarea(
-					v-validate="rules"
+
 					data-vv-delay="500"
 					v-model="internalValue"
 					:id="id"
@@ -43,7 +43,7 @@
 				svg(xmlns='http://www.w3.org/2000/svg' viewBox='-5 -5 15 15' )
 					path.arrow(d='M 0 5 L 5 10 L 10 5' )
 				select(
-					v-validate="rules"
+
 					v-model="internalValue"
 					:id="id"
 					@change="onValueChange"
@@ -66,7 +66,6 @@
 
 
 export default {
-	inject: ['$validator'],
 	created() {
 	},
 	watch: {
