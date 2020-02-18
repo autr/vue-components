@@ -8,12 +8,12 @@
 		:class="fieldClasses"
 	)
 		.field-inner
+			slot
 			.text-wrapper( 
 				v-if="inputType"
 				)
 				input(
-
-					data-vv-delay="500"
+					v-debounce:400ms="onDebounce" 
 					v-model="internalValue"
 					:id="id"
 					@change="onValueChange"
@@ -21,13 +21,14 @@
 					:disabled="disabled"
 					:placeholder="placeholder"
 					:type="inputType" 
+					:autocomplete="(autocomplete) ? 'on' : 'off'"
+					:tabindex="tabindex"
 				)
 			.text-wrapper( 
 				v-if=" type == 'textarea' "
 				)
 				textarea(
 
-					data-vv-delay="500"
 					v-model="internalValue"
 					:id="id"
 					@change="onValueChange"
@@ -36,6 +37,8 @@
 					:disabled="disabled"
 					:placeholder="placeholder"
 					:type="inputType" 
+					:autocomplete="(autocomplete) ? 'true' : 'false'"
+					:tabindex="tabindex"
 				)
 			.select-wrapper( 
 				v-if=" type == 'select' "
@@ -115,8 +118,14 @@ export default {
 	components: {
 	},
 	methods: {
+		onDebounce(o) {
+
+			console.log('🕹 [Field.vue] debounce:', this.$props.id);
+			this.$emit('update:value', this.internalValue );
+			this.$emit('onChange', this.internalValue );
+		},
 		onValueChange(o) {
-			console.log('value changed', this.$props.id);
+			console.log('🕹 [Field.vue] changed:', this.$props.id);
 			this.$emit('update:value', this.internalValue );
 			this.$emit('onChange', this.internalValue );
 		}
@@ -128,6 +137,11 @@ export default {
 		id: {
 			type: String,
 			required: true
+		},
+		autocomplete: {
+			type: Boolean,
+			required: false,
+			default: false
 		},
 		type: {
 			type: String,
@@ -157,6 +171,11 @@ export default {
 			type: Number,
 			required: false,
 			default: 12
+		},
+		tabindex: {
+			type: Number,
+			required: false,
+			default: 0
 		}
 	}
 }
